@@ -93,10 +93,10 @@
             this.tableLayoutPanel1.AutoSize = true;
             this.tableLayoutPanel1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("tableLayoutPanel1.BackgroundImage")));
             this.tableLayoutPanel1.ColumnCount = 6;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 200F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 150F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 150F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 0F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 414F));
             this.tableLayoutPanel1.Controls.Add(this.btnMods, 4, 1);
@@ -104,12 +104,12 @@
             this.tableLayoutPanel1.Controls.Add(this.label4, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.label1, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.cmbVersiones, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.txtNombre, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.checkBox1, 2, 1);
             this.tableLayoutPanel1.Controls.Add(this.label2, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.label5, 3, 0);
             this.tableLayoutPanel1.Controls.Add(this.btnJugar, 5, 1);
             this.tableLayoutPanel1.Controls.Add(this.label3, 5, 0);
+            this.tableLayoutPanel1.Controls.Add(this.txtNombre, 1, 1);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 472);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -132,7 +132,7 @@
             this.btnMods.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnMods.Font = new System.Drawing.Font("AdwaitaMono Nerd Font", 8.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnMods.ForeColor = System.Drawing.SystemColors.AppWorkspace;
-            this.btnMods.Location = new System.Drawing.Point(514, 26);
+            this.btnMods.Location = new System.Drawing.Point(607, 26);
             this.btnMods.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnMods.Name = "btnMods";
             this.btnMods.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
@@ -147,10 +147,10 @@
             this.txtRam.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.txtRam.Font = new System.Drawing.Font("AdwaitaMono Nerd Font", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtRam.ForeColor = System.Drawing.SystemColors.Desktop;
-            this.txtRam.Location = new System.Drawing.Point(399, 33);
+            this.txtRam.Location = new System.Drawing.Point(457, 31);
             this.txtRam.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.txtRam.Name = "txtRam";
-            this.txtRam.Size = new System.Drawing.Size(109, 20);
+            this.txtRam.Size = new System.Drawing.Size(144, 24);
             this.txtRam.TabIndex = 11;
             this.txtRam.Text = "4096";
             // 
@@ -160,9 +160,9 @@
             this.label4.BackColor = System.Drawing.Color.Transparent;
             this.label4.Font = new System.Drawing.Font("AdwaitaMono Nerd Font", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label4.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label4.Location = new System.Drawing.Point(340, 4);
+            this.label4.Location = new System.Drawing.Point(357, 4);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(53, 18);
+            this.label4.Size = new System.Drawing.Size(65, 20);
             this.label4.TabIndex = 7;
             this.label4.Text = "Forge";
             // 
@@ -174,21 +174,22 @@
             this.label1.ForeColor = System.Drawing.SystemColors.ButtonFace;
             this.label1.Location = new System.Drawing.Point(7, 4);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(71, 18);
+            this.label1.Size = new System.Drawing.Size(87, 20);
             this.label1.TabIndex = 4;
             this.label1.Text = "Versión";
             this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
             // cmbVersiones
             // 
-            this.cmbVersiones.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.cmbVersiones.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbVersiones.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
+            this.cmbVersiones.CausesValidation = false;
+            this.cmbVersiones.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.cmbVersiones.Font = new System.Drawing.Font("AdwaitaMono Nerd Font", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cmbVersiones.FormattingEnabled = true;
-            this.cmbVersiones.Location = new System.Drawing.Point(7, 33);
+            this.cmbVersiones.Location = new System.Drawing.Point(7, 26);
             this.cmbVersiones.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cmbVersiones.Name = "cmbVersiones";
-            this.cmbVersiones.Size = new System.Drawing.Size(212, 21);
+            this.cmbVersiones.Size = new System.Drawing.Size(194, 25);
             this.cmbVersiones.TabIndex = 1;
             this.cmbVersiones.SelectedIndexChanged += new System.EventHandler(this.cmbVersiones_SelectedIndexChanged);
             // 
@@ -197,10 +198,10 @@
             this.txtNombre.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.txtNombre.Font = new System.Drawing.Font("AdwaitaMono Nerd Font", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtNombre.ForeColor = System.Drawing.SystemColors.Desktop;
-            this.txtNombre.Location = new System.Drawing.Point(225, 33);
+            this.txtNombre.Location = new System.Drawing.Point(207, 31);
             this.txtNombre.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.txtNombre.Name = "txtNombre";
-            this.txtNombre.Size = new System.Drawing.Size(109, 20);
+            this.txtNombre.Size = new System.Drawing.Size(144, 24);
             this.txtNombre.TabIndex = 2;
             this.txtNombre.TextChanged += new System.EventHandler(this.txtNombre_TextChanged);
             // 
@@ -209,10 +210,10 @@
             this.checkBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
             this.checkBox1.AutoSize = true;
             this.checkBox1.BackColor = System.Drawing.Color.Transparent;
-            this.checkBox1.Location = new System.Drawing.Point(359, 28);
+            this.checkBox1.Location = new System.Drawing.Point(395, 28);
             this.checkBox1.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(15, 31);
+            this.checkBox1.Size = new System.Drawing.Size(18, 31);
             this.checkBox1.TabIndex = 8;
             this.checkBox1.UseVisualStyleBackColor = false;
             this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
@@ -223,9 +224,9 @@
             this.label2.BackColor = System.Drawing.Color.Transparent;
             this.label2.Font = new System.Drawing.Font("AdwaitaMono Nerd Font", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label2.Location = new System.Drawing.Point(225, 4);
+            this.label2.Location = new System.Drawing.Point(207, 4);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(71, 18);
+            this.label2.Size = new System.Drawing.Size(87, 20);
             this.label2.TabIndex = 9;
             this.label2.Text = "Usuario";
             // 
@@ -235,9 +236,9 @@
             this.label5.BackColor = System.Drawing.Color.Transparent;
             this.label5.Font = new System.Drawing.Font("AdwaitaMono Nerd Font", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label5.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.label5.Location = new System.Drawing.Point(399, 4);
+            this.label5.Location = new System.Drawing.Point(457, 4);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(35, 18);
+            this.label5.Size = new System.Drawing.Size(43, 20);
             this.label5.TabIndex = 10;
             this.label5.Text = "Ram";
             this.label5.Click += new System.EventHandler(this.label5_Click);
@@ -252,7 +253,7 @@
             this.btnJugar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnJugar.Font = new System.Drawing.Font("AdwaitaMono Nerd Font", 8.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnJugar.ForeColor = System.Drawing.Color.Black;
-            this.btnJugar.Location = new System.Drawing.Point(514, 26);
+            this.btnJugar.Location = new System.Drawing.Point(607, 26);
             this.btnJugar.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnJugar.Name = "btnJugar";
             this.btnJugar.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
@@ -266,11 +267,12 @@
             // 
             this.label3.AutoSize = true;
             this.label3.BackColor = System.Drawing.Color.Transparent;
+            this.label3.Font = new System.Drawing.Font("AdwaitaMono Nerd Font", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.ForeColor = System.Drawing.Color.Transparent;
-            this.label3.Location = new System.Drawing.Point(515, 4);
+            this.label3.Location = new System.Drawing.Point(608, 4);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(0, 16);
+            this.label3.Size = new System.Drawing.Size(0, 20);
             this.label3.TabIndex = 6;
             // 
             // progressBar1
@@ -299,6 +301,7 @@
             this.Name = "Form1";
             this.Text = "CaMinecraft";
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.Shown += new System.EventHandler(this.Form1_Shown);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();

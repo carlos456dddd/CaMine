@@ -63,9 +63,9 @@ namespace CaMine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ChatGPT_Image_7_jun_2026__12_41_21__1_ {
+        internal static System.Drawing.Bitmap image1 {
             get {
-                object obj = ResourceManager.GetObject("ChatGPT Image 7 jun 2026, 12_41_21 (1)", resourceCulture);
+                object obj = ResourceManager.GetObject("image1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -73,9 +73,9 @@ namespace CaMine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ChatGPT_Image_7_jun_2026__12_41_21__3_ {
+        internal static System.Drawing.Bitmap image2 {
             get {
-                object obj = ResourceManager.GetObject("ChatGPT Image 7 jun 2026, 12_41_21 (3)", resourceCulture);
+                object obj = ResourceManager.GetObject("image2", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

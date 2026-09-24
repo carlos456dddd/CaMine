@@ -131,6 +131,16 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Models\ControlBuffer.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Models\VersionStatus.cs" />
+    <Compile Include="Services\IMinecraftService.cs" />
+    <Compile Include="Services\MinecraftService.cs" />
+    <Compile Include="Services\IVersionChecker.cs" />
+    <Compile Include="Services\VersionChecker.cs" />
+    <Compile Include="Views\IMinecraftLauncherView.cs" />
+    <Compile Include="Presenters\MainPresenter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
@@ -147,6 +157,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="CaMine_TemporaryKey.pfx" />
+    <None Include="Correccione\Arreglos.md" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -174,10 +185,13 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\ChatGPT Image 7 jun 2026, 12_41_21 %281%29.png" />
+    <None Include="Resources\image1.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\ChatGPT Image 7 jun 2026, 12_41_21 %283%29.png" />
+    <None Include="Resources\image2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="System\Windows\Forms\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

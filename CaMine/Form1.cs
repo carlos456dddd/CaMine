@@ -1,9 +1,7 @@
-﻿using CmlLib.Core;
-using CmlLib.Core.Auth;
-using CmlLib.Core.Installer.Forge;
-using CmlLib.Core.Installers;
-using CmlLib.Core.ProcessBuilder;
+﻿using CaMine.Presenters;
+using CaMine.Views;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -12,413 +10,283 @@ using System.Windows.Forms;
 
 namespace CaMine
 {
-    public partial class Form1 : Form
+   
+    public partial class Form1 : Form, IMinecraftLauncherView
     {
-        private MinecraftPath path;
-        private MinecraftLauncher launcher;
-        private ForgeInstaller forgeInstaller;
-        private string minecraftPath;
-
-        private readonly Color ColorInstalado = Color.FromArgb(113, 222, 117);
-        private readonly Color ColorNoInstalado = Color.FromArgb(240, 87, 65);
-        private readonly Color ColorTexto = Color.Black;
+        private MainPresenter _presenter;
 
         public Form1()
         {
             InitializeComponent();
+            this.Opacity = 0;
+
+        }
+       
+
+        public void SetPresenter(MainPresenter presenter)
+        {
+            _presenter = presenter;
         }
 
-        private async void Form1_Load(object sender, EventArgs e)
+        public string SelectedVersion => cmbVersiones.SelectedItem?.ToString();
+        public string UserName => txtNombre.Text.Trim();
+
+        public int RamMb
         {
-            minecraftPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                ".minecraft-launcher-amigos");
-            Directory.CreateDirectory(minecraftPath);
-
-            path = new MinecraftPath(minecraftPath);
-            launcher = new MinecraftLauncher(path);
-            forgeInstaller = new ForgeInstaller(launcher);
-
-            cmbVersiones.DrawMode = DrawMode.OwnerDrawFixed;
-            cmbVersiones.DrawItem += cmbVersiones_DrawItem;
-
-            // OCULTAR fila del progressBar al inicio (Height = 0)
-            tableLayoutPanel2.RowStyles[1].Height = 0;
-            progressBar1.Visible = false;
-
-            var versions = await launcher.GetAllVersionsAsync();
-            foreach (var version in versions)
+            get
             {
-                cmbVersiones.Items.Add(version.Name);
+                if (string.IsNullOrWhiteSpace(txtRam.Text)) return 4096;
+                if (int.TryParse(txtRam.Text, out int ram)) return ram;
+                return -1;
+            }
+        }
+
+        public bool ForgeEnabled => checkBox1.Checked;
+        public Color ColorInstalled => Color.FromArgb(113, 222, 117);
+        public Color ColorNotInstalled => Color.FromArgb(240, 87, 65);
+
+        public event EventHandler LoadRequested;
+        public event EventHandler PlayRequested;
+        public event EventHandler SelectedVersionChanged;
+        public event EventHandler ForgeToggled;
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            
+            //cmbVersiones.DrawItem += cmbVersiones_DrawItem;
+            //tableLayoutPanel2.RowStyles[1].Height = 0;
+            //progressBar1.Visible = false;
+            //LoadRequested?.Invoke(this, EventArgs.Empty);
+        }
+        
+
+        private Dictionary<string, bool> _versionInstalledCache = new Dictionary<string, bool>();
+        public void SetVersions(IList<string> versions)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action(() => SetVersions(versions)));
+                return;
             }
 
+            cmbVersiones.Items.Clear();
+            _versionInstalledCache.Clear();
+                
+
+            foreach (var v in versions)
+            {
+
+                cmbVersiones.Items.Add(v);
+                var status = _presenter.CheckVersion(v);
+                _versionInstalledCache[v] = status?.MinecraftInstalled ?? false;
+            }
+           
+        }
+
+        public void SetLastVersionSelected()
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action(SetLastVersionSelected));
+                return;
+            }
             if (cmbVersiones.Items.Count > 0)
                 cmbVersiones.SelectedIndex = cmbVersiones.Items.Count - 1;
         }
 
-        // ============================================================
-        // MOSTRAR fila de progreso (descarga activa)
-        // ============================================================
-        private void MostrarFilaProgreso()
+        public void SetStatus(string text, Color color)
         {
-            tableLayoutPanel2.RowStyles[1].Height = 15; // o el tamaño que necesites
-            progressBar1.Visible = true;
-            
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action(() => SetStatus(text, color)));
+                return;
+            }
+            label3.Text = text;
+            label3.ForeColor = color;
+            label3.BackColor = Color.White;
         }
 
-        // ============================================================
-        // OCULTAR fila de progreso (sin descarga)
-        // ============================================================
-        private void OcultarFilaProgreso()
+        public void ShowProgress()
         {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action(ShowProgress));
+                return;
+            }
+            tableLayoutPanel2.RowStyles[1].Height = 15;
+            progressBar1.Visible = true;
+        }
+
+        public void HideProgress()
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action(HideProgress));
+                return;
+            }
             tableLayoutPanel2.RowStyles[1].Height = 0;
             progressBar1.Visible = false;
         }
 
-        // ============================================================
-        // ACTUALIZAR progreso con mensaje útil
-        // ============================================================
-        private void ActualizarProgresoUI(int valor, int maximo, string mensaje)
+        public void SetProgress(int value, int maximum)
         {
             if (InvokeRequired)
             {
-                Invoke(new Action(() => ActualizarProgresoUI(valor, maximo, mensaje)));
+                BeginInvoke(new Action(() => SetProgress(value, maximum)));
                 return;
             }
-
-            progressBar1.Maximum = Math.Max(maximo, 1);
-            progressBar1.Value = Math.Min(valor, progressBar1.Maximum);
+            progressBar1.Maximum = Math.Max(maximum, 1);
+            progressBar1.Value = Math.Min(value, progressBar1.Maximum);
         }
 
-        // ... (DrawItem, VersionMinecraftInstalada, ForgeInstalado, ObtenerNombreVersionForge igual)
-
-        private void cmbVersiones_DrawItem(object sender, DrawItemEventArgs e)
+        public void SetPlayEnabled(bool enabled)
         {
-            if (e.Index < 0) return;
-            string versionId = cmbVersiones.Items[e.Index].ToString();
-            bool instalada = VersionMinecraftInstalada(versionId);
-            Color fondo = instalada ? ColorInstalado : ColorNoInstalado;
-            e.Graphics.FillRectangle(new SolidBrush(fondo), e.Bounds);
-            e.Graphics.DrawString(versionId, e.Font, new SolidBrush(ColorTexto),
-                e.Bounds, StringFormat.GenericDefault);
-            e.DrawFocusRectangle();
-        }
-
-        private bool VersionMinecraftInstalada(string versionId)
-        {
-            string versionPath = Path.Combine(path.Versions, versionId);
-            string versionJson = Path.Combine(versionPath, $"{versionId}.json");
-            string versionJar = Path.Combine(versionPath, $"{versionId}.jar");
-            return Directory.Exists(versionPath) && File.Exists(versionJson) && File.Exists(versionJar);
-        }
-
-        private bool ForgeInstalado(string versionId)
-        {
-            string versionsDir = path.Versions;
-            if (!Directory.Exists(versionsDir)) return false;
-            var directorios = Directory.GetDirectories(versionsDir);
-            foreach (var dir in directorios)
+            if (InvokeRequired)
             {
-                string nombreDir = Path.GetFileName(dir);
-                if (nombreDir.StartsWith(versionId) && nombreDir.Contains("forge"))
-                {
-                    string jsonPath = Path.Combine(dir, $"{nombreDir}.json");
-                    string jarPath = Path.Combine(dir, $"{nombreDir}.jar");
-                    if (File.Exists(jsonPath) && File.Exists(jarPath)) return true;
-                }
-            }
-            return false;
-        }
-
-        private string ObtenerNombreVersionForge(string versionId)
-        {
-            string versionsDir = path.Versions;
-            if (!Directory.Exists(versionsDir)) return null;
-            var directorios = Directory.GetDirectories(versionsDir);
-            foreach (var dir in directorios)
-            {
-                string nombreDir = Path.GetFileName(dir);
-                if (nombreDir.StartsWith(versionId) && nombreDir.Contains("forge"))
-                {
-                    string jsonPath = Path.Combine(dir, $"{nombreDir}.json");
-                    string jarPath = Path.Combine(dir, $"{nombreDir}.jar");
-                    if (File.Exists(jsonPath) && File.Exists(jarPath)) return nombreDir;
-                }
-            }
-            return null;
-        }
-
-        // ============================================================
-        // ACTUALIZAR LABEL3
-        // ============================================================
-        private void ActualizarEstadoLabel(string versionId)
-        {
-            label3.BackColor = Color.White;
-            if (string.IsNullOrEmpty(versionId))
-            {
-                label3.Text = "Selecciona una versión";
-                label3.ForeColor = Color.Gray;
+                BeginInvoke(new Action(() => SetPlayEnabled(enabled)));
                 return;
             }
-
-            bool minecraftInstalado = VersionMinecraftInstalada(versionId);
-            bool forgeInstalado = ForgeInstalado(versionId);
-
-            if (minecraftInstalado)
-            {
-                if (forgeInstalado && checkBox1.Checked)
-                    label3.Text = "Instalado + Forge";
-               
-                else
-                    label3.Text = "Instalado";
-                label3.ForeColor = ColorInstalado;
-            }
-            else
-            {
-                label3.Text = "Sin existencia";
-                label3.ForeColor = ColorNoInstalado;
-            }
-
-            label3.Font = new Font("AdwaitaMono Nerd Font", 10.2F,
-                FontStyle.Bold, GraphicsUnit.Point, ((byte)(0)));
+            btnJugar.Enabled = enabled;
         }
 
-        // ============================================================
-        // BOTÓN JUGAR - ProgressBar SOLO si descarga
-        // ============================================================
-        private async void btnJugar_Click(object sender, EventArgs e)
+        public void SetPlayText(string text)
         {
-            string versionId = cmbVersiones.SelectedItem?.ToString();
-            string nombreUsuario = txtNombre.Text.Trim();
-
-            if (string.IsNullOrEmpty(versionId))
+            if (InvokeRequired)
             {
-                MessageBox.Show("Selecciona una versión");
+                BeginInvoke(new Action(() => SetPlayText(text)));
                 return;
             }
+            btnJugar.Text = text;
+        }
 
-            if (string.IsNullOrEmpty(nombreUsuario))
+        public void InvalidateVersionList()
+        {
+            if (InvokeRequired)
             {
-                MessageBox.Show("Escribe tu nombre de usuario");
+                BeginInvoke(new Action(InvalidateVersionList));
                 return;
             }
-
-            int ramMb = 4096;
-            if (!string.IsNullOrEmpty(txtRam.Text))
+            // Recargar cache
+            _versionInstalledCache.Clear();
+            for (int i = 0; i < cmbVersiones.Items.Count; i++)
             {
-                if (!int.TryParse(txtRam.Text, out ramMb) || ramMb < 512)
-                {
-                    MessageBox.Show("Ingresa una cantidad de RAM válida (mínimo 512 MB)");
-                    return;
-                }
+                string v = cmbVersiones.Items[i].ToString();
+                var status = _presenter?.CheckVersion(v);
+                _versionInstalledCache[v] = status?.MinecraftInstalled ?? false;
             }
-
-            btnJugar.Enabled = false;
-            string versionALanzar = versionId;
-            bool necesitaDescarga = false;
-
-            try
-            {
-                bool minecraftInstalado = VersionMinecraftInstalada(versionId);
-
-                // ═══════════════════════════════════════════════════════
-                // CASO: FORGE ACTIVADO
-                // ═══════════════════════════════════════════════════════
-                if (checkBox1.Checked)
-                {
-
-                   
-                    bool forgeYaInstalado = ForgeInstalado(versionId);
-
-                    if (!forgeYaInstalado)
-                    {
-                        necesitaDescarga = true;
-                        MostrarFilaProgreso();
-
-                        label3.Text = "Instalando Forge...";
-                        label3.ForeColor = Color.Orange;
-                        btnJugar.Text = "Descargando...";
-
-                        var fileProgress = new Progress< InstallerProgressChangedEventArgs > (ev =>
-                        {
-                            // SOLO mensajes útiles, una sola línea
-                            string accion = ev.EventType.ToString(); // Download, Extract, Install
-                            string archivo = Path.GetFileName(ev.Name) ?? ev.Name;
-
-                            // Acortar si es muy largo
-                            if (archivo.Length > 35)
-                                archivo = archivo.Substring(0, 32) + "...";
-
-                            string mensaje = $"{accion}: {archivo}";
-
-                            ActualizarProgresoUI(ev.ProgressedTasks, ev.TotalTasks, mensaje);
-                            Console.WriteLine($"[{ev.EventType}] {ev.ProgressedTasks}/{ev.TotalTasks} {ev.Name}");
-                        });
-
-                        var byteProgress = new Progress<ByteProgress>(ev =>
-                        {
-                            Console.WriteLine($"{ev.ToRatio() * 100:F1}%");
-                        });
-
-                        versionALanzar = await forgeInstaller.Install(versionId, new ForgeInstallOptions
-                        {
-                            FileProgress = fileProgress,
-                            ByteProgress = byteProgress,
-                            InstallerOutput = new Progress<string>(ev => Console.WriteLine(ev)),
-                        });
-
-                        ActualizarProgresoUI(1, 1, "Finalizando Forge...");
-                        await launcher.InstallAsync(versionALanzar, fileProgress, byteProgress);
-                    }
-                    else
-                    {
-                        versionALanzar = ObtenerNombreVersionForge(versionId);
-                        // Forge ya existe, NO mostrar ProgressBar
-                    }
-                }
-                // ═══════════════════════════════════════════════════════
-                // CASO: VANILLA
-                // ═══════════════════════════════════════════════════════
-                else
-                {
-                    tableLayoutPanel1.ColumnStyles[4].Width = 0;
-
-                    if (!minecraftInstalado)
-                    {
-                        necesitaDescarga = true;
-                        MostrarFilaProgreso();
-
-                        label3.Text = "Instalando...";
-                        label3.ForeColor = Color.Orange;
-                        btnJugar.Text = "Descargando...";
-
-                        var fileProgress = new Progress< InstallerProgressChangedEventArgs > (ev =>
-                        {
-                            string accion = ev.EventType.ToString();
-                            string archivo = Path.GetFileName(ev.Name) ?? ev.Name;
-
-                            if (archivo.Length > 35)
-                                archivo = archivo.Substring(0, 32) + "...";
-
-                            string mensaje = $"{accion}: {archivo}";
-
-                            ActualizarProgresoUI(ev.ProgressedTasks, ev.TotalTasks, mensaje);
-                        });
-
-                        var byteProgress = new Progress<ByteProgress>(ev =>
-                        {
-                            Console.WriteLine($"{ev.ToRatio() * 100:F1}%");
-                        });
-
-                        await launcher.InstallAsync(versionId, fileProgress, byteProgress);
-                    }
-                    else
-                    {
-                        // Ya instalado, NO mostrar ProgressBar
-                        btnJugar.Text = "Versión lista ✓";
-                        await Task.Delay(500);
-                    }
-                }
-
-                // Lanzar
-                if (!necesitaDescarga)
-                {
-                    btnJugar.Text = "Lanzando...";
-                }
-                else
-                {
-                    ActualizarProgresoUI(1, 1, "Listo!");
-                    await Task.Delay(300);
-                }
-
-                cmbVersiones.Invalidate();
-                ActualizarEstadoLabel(versionId);
-
-                btnJugar.Text = "Lanzando...";
-
-                var launchOption = new MLaunchOption
-                {
-                    Session = MSession.CreateOfflineSession(nombreUsuario),
-                    MaximumRamMb = ramMb,
-                };
-
-                var process = await launcher.BuildProcessAsync(versionALanzar, launchOption);
-
-                var processWrapper = new ProcessWrapper(process);
-                processWrapper.OutputReceived += (s, log) => Console.WriteLine($"[Game] {log}");
-                processWrapper.StartWithEvents();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error: " + ex.Message);
-                label3.Text = "Error en instalación";
-                label3.ForeColor = Color.DarkRed;
-            }
-            finally
-            {
-                btnJugar.Text = "Jugar";
-                btnJugar.Enabled = true;
-                OcultarFilaProgreso();
-            }
+            cmbVersiones.Invalidate();
         }
 
-        private void cmbVersiones_SelectedIndexChanged(object sender, EventArgs e)
+        public void ShowMessage(string text)
         {
-            string versionId = cmbVersiones.SelectedItem?.ToString();
-            ActualizarEstadoLabel(versionId);
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action(() => ShowMessage(text)));
+                return;
+            }
+            MessageBox.Show(text);
         }
-      
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
-        {
-            string versionId = cmbVersiones.SelectedItem?.ToString();
 
-            if (checkBox1.Checked)
+        public void SetForgeColumnVisible(bool visible)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action(() => SetForgeColumnVisible(visible)));
+                return;
+            }
+            if (visible)
             {
                 tableLayoutPanel1.ColumnStyles[4].Width = 80;
+                btnMods.Size = new Size(80, btnMods.Height);
             }
             else
             {
                 tableLayoutPanel1.ColumnStyles[4].Width = 0;
+                btnMods.Size = new Size(1, btnMods.Height);
             }
-            ActualizarEstadoLabel(versionId);
         }
 
-        private void label1_Click(object sender, EventArgs e) { }
-        private void label2_Click(object sender, EventArgs e) { }
-        private void txtNombre_TextChanged(object sender, EventArgs e) { }
-        private void pictureBox1_Click(object sender, EventArgs e) { }
-        private void label5_Click(object sender, EventArgs e) { }
-
-        private void tableLayoutPanel2_Paint(object sender, PaintEventArgs e)
+        private void cmbVersiones_DrawItem(object sender, DrawItemEventArgs e)
         {
+            if (e.Index < 0) return;
 
+            string versionId = cmbVersiones.Items[e.Index].ToString();
+            bool installed = _versionInstalledCache.ContainsKey(versionId)? _versionInstalledCache[versionId]: false;
+            Color fondo = installed ? ColorInstalled : ColorNotInstalled;
+            Color texto = Color.Black;
+
+            if ((e.State & DrawItemState.Selected) == DrawItemState.Selected)
+            {
+
+                fondo = SystemColors.Highlight;
+
+
+            }
+
+            using (var brush = new SolidBrush(fondo))
+                e.Graphics.FillRectangle(brush, e.Bounds);
+            using (var brushTexto = new SolidBrush(texto))
+            {
+                e.Graphics.DrawString(versionId, e.Font, brushTexto,
+                    new Rectangle(e.Bounds.X + 2, e.Bounds.Y, e.Bounds.Width - 4, e.Bounds.Height),
+                    StringFormat.GenericDefault);
+            }
+
+            // Solo dibujar foco si tiene el foco real (evita parpadeo del rectángulo punteado)
+            //if ((e.State & DrawItemState.Focus) == DrawItemState.Focus)
+              //  e.DrawFocusRectangle();
         }
 
+        private void btnJugar_Click(object sender, EventArgs e)
+        {
+            PlayRequested?.Invoke(this, EventArgs.Empty);
+        }
 
-        private void Abrir_Carpeta() {
+        private void cmbVersiones_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            SelectedVersionChanged?.Invoke(this, EventArgs.Empty);
+        }
 
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            ForgeToggled?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void BtnMods_Click(object sender, EventArgs e)
+        {
+            var minecraftPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                ".minecraft-launcher-amigos");
             string rutaMods = Path.Combine(minecraftPath, "mods");
 
             if (!Directory.Exists(rutaMods))
                 Directory.CreateDirectory(rutaMods);
 
-            var psi = new ProcessStartInfo()
+            var psi = new ProcessStartInfo
             {
-                FileName = rutaMods,  // Abrir directamente la carpeta
+                FileName = rutaMods,
                 UseShellExecute = true,
                 Verb = "open"
             };
-
             var proceso = Process.Start(psi);
-
-            if (proceso != null)
-            {
-                proceso.WaitForInputIdle(2000);
-            }
+            proceso?.WaitForInputIdle(2000);
         }
-        private void BtnMods_Click(object sender, System.EventArgs e)
+
+        private void tableLayoutPanel2_Paint(object sender, PaintEventArgs e) { }
+        private void pictureBox1_Click(object sender, EventArgs e) { }
+        private void label1_Click(object sender, EventArgs e) { }
+        private void label5_Click(object sender, EventArgs e) { }
+        private void txtNombre_TextChanged(object sender, EventArgs e) { }
+
+        private async void Form1_Shown(object sender, EventArgs e)
         {
-            Abrir_Carpeta();
+            cmbVersiones.DrawItem += cmbVersiones_DrawItem;
+            tableLayoutPanel2.RowStyles[1].Height = 0;
+            progressBar1.Visible = false;
+
+            LoadRequested?.Invoke(this, EventArgs.Empty);
+            await Task.Delay(500);
+            this.Opacity = 1;
         }
     }
 }
