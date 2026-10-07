@@ -21,7 +21,7 @@ OutputDir=Output
 OutputBaseFilename=Camine-Setup
 SetupIconFile=CaMine\images.ico
 SolidCompression=yes
-WizardStyle=modern dynamic
+WizardStyle=modern
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
