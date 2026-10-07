@@ -1,0 +1,72 @@
+name: Build y Release
+
+on:
+  push:
+    branches: 
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    if: github.ref_name == 'main' || startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Configurar NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Restaurar paquetes
+        run: nuget restore CaMine\CaMine.csproj -PackagesDirectory packages
+
+      - name: Compilar (Release)
+        run: msbuild CaMine\CaMine.csproj /p:Configuration=Release /p:Platform=AnyCPU
+
+      - name: Obtener versión
+        id: ver
+        shell: pwsh
+        run: |
+          $v = "${{ github.ref_name }}".TrimStart('v')
+          if (-not $v -or $v -eq "main") { $v = "0.0.0" }
+          "version=$v" >> $env:GITHUB_OUTPUT
+
+      - name: Crear ZIP portable
+        shell: pwsh
+        run: |
+          Compress-Archive -Path CaMine\bin\Release\* -DestinationPath "CaMine-${{ steps.ver.outputs.version }}-portable.zip"
+
+      - name: Instalar Inno Setup
+        run: choco install innosetup -y
+
+      - name: Crear instalador
+        shell: pwsh
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=${{ steps.ver.outputs.version }} installer.iss
+
+      - name: Publicar Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            CaMine-*-portable.zip
+            Output/Camine-Setup.exe
+          generate_release_notes: true
+
+      - name: Subir artefactos (ejecución manual)
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: CaMine-build
+          path: |
+            CaMine-*-portable.zip
+            Output/Camine-Setup.exe

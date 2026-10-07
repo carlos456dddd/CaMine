@@ -107,6 +107,7 @@ CaMine
    - Selecciona la configuración `Debug` o `Release` (x64 o AnyCPU) y presiona `F5` o haz clic en **Iniciar**.
 
 ---
+<img width="1652" height="812" alt="image" src="https://github.com/user-attachments/assets/87734abd-49fc-4588-b85d-d857d7b73856" />
 
 ## 📄 Licencia
 
