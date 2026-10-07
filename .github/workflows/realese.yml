@@ -45,13 +45,11 @@ jobs:
         run: |
           Compress-Archive -Path CaMine\bin\Release\* -DestinationPath "CaMine-${{ steps.ver.outputs.version }}-portable.zip"
 
-      - name: Instalar Inno Setup
-        run: choco install innosetup -y
-
-      - name: Crear instalador
-        shell: pwsh
-        run: |
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=${{ steps.ver.outputs.version }} installer.iss
+      - name: Crear instalador (Inno Setup Nativo)
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: installer.iss
+          options: /DMyAppVersion=${{ steps.ver.outputs.version }}
 
       - name: Publicar Release
         if: startsWith(github.ref, 'refs/tags/')
