@@ -30,7 +30,7 @@ jobs:
         run: nuget restore CaMine\CaMine.csproj -PackagesDirectory packages
 
       - name: Compilar (Release)
-        run: msbuild CaMine\CaMine.csproj /p:Configuration=Release /p:Platform=AnyCPU
+        run: msbuild CaMine\CaMine.csproj /p:Configuration=Release /p:Platform=AnyCPU /p:SignManifests=false /p:SkipCopyingSymbolsToOutputDirectory=true
 
       - name: Obtener versión
         id: ver
