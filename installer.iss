@@ -19,7 +19,7 @@ ChangesAssociations=yes
 DisableProgramGroupPage=yes
 OutputDir=Output
 OutputBaseFilename=Camine-Setup
-SetupIconFile=CaMine\icon.ico
+SetupIconFile=CaMine\images.ico
 SolidCompression=yes
 WizardStyle=modern dynamic
 
